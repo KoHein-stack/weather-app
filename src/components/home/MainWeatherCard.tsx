@@ -9,22 +9,32 @@ type MainWeatherCardProps = {
     unit: Unit;
 };
 
+/**
+ * MainWeatherCard: Displays the current temperature, weather icon, 
+ * and a short description (e.g., "Clear Sky").
+ */
 export default function MainWeatherCard({ temp, description, unit }: MainWeatherCardProps) {
+    // Dynamic unit symbol display
     const unitSymbol = unit === 'metric' ? '\u00B0C' : '\u00B0F';
 
     return (
         <View style={styles.container}>
             <View style={styles.content}>
+                {/* Visual weather indicator */}
                 <Ionicons 
                     name="partly-sunny" 
                     size={80} 
                     color={theme.colors.primary} 
                     style={styles.icon} 
                 />
+                
+                {/* Temperature and Unit display */}
                 <View style={styles.tempContainer}>
                     <Text style={styles.temp}>{Math.round(temp)}</Text>
                     <Text style={styles.unit}>{unitSymbol}</Text>
                 </View>
+                
+                {/* Human-readable weather description */}
                 <Text style={styles.description}>{description}</Text>
             </View>
         </View>

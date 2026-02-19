@@ -44,9 +44,7 @@ export default function AppNavigator() {
     })
   }
       >
-    <Tab.Screen name="Home" component = { HomeScreen } options = {{ headerShown: false, 
-      
-     }
+    <Tab.Screen name="Home" component = { HomeScreen } options = {{ headerShown: false }
 } />
   < Tab.Screen name = "Settings" component = { SettingsScreen } />
     </Tab.Navigator>

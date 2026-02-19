@@ -14,8 +14,10 @@ export type CurrentWeatherResponse = {
     feels_like: number;
     humidity: number;
     pressure: number;
+    temp_min: number;
+    temp_max: number;
   };
-  weather: Array<{ description: string }>;
+  weather: Array<{ main: string; description: string }>;
   wind: {
     speed: number;
   };
@@ -27,8 +29,12 @@ export type ForecastItem = {
   dt_txt: string;
   main: {
     temp: number;
+    temp_min: number;
+    temp_max: number;
+    humidity?: number;
+    pressure?: number;
   };
-  weather: Array<{ description: string }>;
+  weather: Array<{ main: string; description: string }>;
 };
 
 export type ForecastResponse = {

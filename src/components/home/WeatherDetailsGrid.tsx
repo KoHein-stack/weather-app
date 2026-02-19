@@ -9,6 +9,9 @@ type DetailItemProps = {
     value: string;
 };
 
+/**
+ * Internal component for rendering each weather attribute (Humidity, Wind, etc.)
+ */
 function DetailItem({ icon, label, value }: DetailItemProps) {
     return (
         <View style={styles.item}>
@@ -31,7 +34,17 @@ type WeatherDetailsGridProps = {
     unit: Unit;
 };
 
-export default function WeatherDetailsGrid({ humidity, windSpeed, visibility, pressure, unit }: WeatherDetailsGridProps) {
+/**
+ * WeatherDetailsGrid: Displays secondary weather data in a 2x2 grid layout.
+ */
+export default function WeatherDetailsGrid({ 
+    humidity, 
+    windSpeed, 
+    visibility, 
+    pressure, 
+    unit 
+}: WeatherDetailsGridProps) {
+    // Adapt speed units based on global app settings
     const speedUnit = unit === 'metric' ? 'm/s' : 'mph';
 
     return (
