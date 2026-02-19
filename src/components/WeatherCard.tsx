@@ -12,21 +12,29 @@ type WeatherCardProps = {
   unit: Unit;
 };
 
-export default function WeatherCard({ cityName, temp, description, feelsLike, humidity, windSpeed, unit }: WeatherCardProps) {
-  const unitSymbol = unit === 'metric' ? '°C' : '°F';
+export default function WeatherCard({ 
+  cityName, 
+  temp, 
+  description, 
+  feelsLike, 
+  humidity, 
+  windSpeed, 
+  unit 
+}: WeatherCardProps) {
+  const unitSymbol = unit === 'metric' ? '\u00B0C' : '\u00B0F';
   const speedUnit = unit === 'metric' ? 'm/s' : 'mph';
 
   return (
-    <View style={styles.card} >
-      <Text style={styles.city}> {cityName} </Text>
-      < Text style={styles.temp} > {Math.round(temp)}{unitSymbol} </Text>
-      < Text style={styles.description} > {description} </Text>
+    <View style={styles.card}>
+      <Text style={styles.city}>{cityName}</Text>
+      <Text style={styles.temp}>{Math.round(temp)}{unitSymbol}</Text>
+      <Text style={styles.description}>{description}</Text>
 
-      < View style={styles.row} >
-        <Text style={styles.meta}> Feels like: {Math.round(feelsLike)} {unitSymbol} </Text>
-        < Text style={styles.meta} > Humidity: {humidity}% </Text>
+      <View style={styles.row}>
+        <Text style={styles.meta}>Feels like: {Math.round(feelsLike)}{unitSymbol}</Text>
+        <Text style={styles.meta}>Humidity: {humidity}%</Text>
       </View>
-      < Text style={styles.meta} > Wind: {windSpeed} {speedUnit} </Text>
+      <Text style={styles.meta}>Wind: {windSpeed} {speedUnit}</Text>
     </View>
   );
 }

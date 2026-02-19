@@ -202,7 +202,7 @@ export default function HomeScreen() {
               humidity={weatherData.main.humidity}
               windSpeed={weatherData.wind.speed}
               pressure={weatherData.main.pressure}
-              visibility={weatherData.visibility}
+              feelsLike={weatherData.main.feels_like}
               unit={unit}
             />
           </>
