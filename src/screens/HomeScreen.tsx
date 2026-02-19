@@ -1,109 +1,165 @@
 import * as Location from 'expo-location';
-import { useCallback, useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  View
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
-import WeatherCard from '../components/WeatherCard';
+import ForecastSection from '../components/home/ForecastSection';
+import MainWeatherCard from '../components/home/MainWeatherCard';
+import WeatherDetailsGrid from '../components/home/WeatherDetailsGrid';
+import WeatherHeader from '../components/home/WeatherHeader';
 import { theme } from '../constants/theme';
 import { useSettings } from '../context/SettingsContext';
 import useWeather from '../hooks/useWeather';
-import { getCurrentWeatherByCoords } from '../services/weatherApi';
+import { getForecastByCoords, getCurrentWeatherByCoords, searchCity } from '../services/weatherApi';
+import { getSearchHistory, saveSearchHistory } from '../store/searchHistory';
+import type { GeoCity, SelectedLocation } from '../types';
 
-export default function HomeScreen(): JSX.Element | null {
+export default function HomeScreen() {
   const { unit, selectedLocation, setSelectedLocation } = useSettings();
-  const { data, loading, error, execute, setData } = useWeather(getCurrentWeatherByCoords);
+  const [history, setHistory] = useState<SelectedLocation[]>([]);
+
+  // ── Current weather ──────────────────────────────────────────────────────
+  const { data: weatherData, loading: weatherLoading, error: weatherError, execute: weatherExecute, setData: setWeatherData } =
+    useWeather(getCurrentWeatherByCoords);
 
   const loadWeather = useCallback(async (): Promise<void> => {
     try {
       if (selectedLocation) {
-        await execute(selectedLocation.lat, selectedLocation.lon, unit);
+        await weatherExecute(selectedLocation.lat, selectedLocation.lon, unit);
         return;
       }
-
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         throw new Error('Location permission is required to load local weather.');
       }
-
       const position = await Location.getCurrentPositionAsync({});
       const locationPayload = {
         lat: position.coords.latitude,
         lon: position.coords.longitude,
         name: 'Your location'
       };
-
       setSelectedLocation(locationPayload);
-      await execute(locationPayload.lat, locationPayload.lon, unit);
+      await weatherExecute(locationPayload.lat, locationPayload.lon, unit);
     } catch (err) {
-      setData(null);
+      setWeatherData(null);
       throw err;
     }
-  }, [execute, selectedLocation, setData, setSelectedLocation, unit]);
+  }, [weatherExecute, selectedLocation, setWeatherData, setSelectedLocation, unit]);
 
   useEffect(() => {
     loadWeather().catch(() => undefined);
   }, [loadWeather]);
 
-  if (loading) return <LoadingState message="Fetching your local weather..." />;
-  if (error) return <ErrorState error={error} onRetry={() => void loadWeather()} />;
-  if (!data) return null;
+  // ── Search ────────────────────────────────────────────────────────────────
+  const { execute: searchExecute } = useWeather(searchCity);
+
+  useEffect(() => {
+    void getSearchHistory().then(setHistory);
+  }, []);
+
+  const onSearch = async (query: string): Promise<void> => {
+    if (!query.trim()) return;
+    const result = await searchExecute(query, 1);
+    if (result && result.length > 0) {
+      onSelectLocation(result[0]);
+    }
+  };
+
+  const onSelectLocation = async (item: GeoCity | SelectedLocation): Promise<void> => {
+    const location: SelectedLocation = {
+      lat: item.lat,
+      lon: item.lon,
+      name: item.name,
+      country: item.country
+    };
+    setSelectedLocation(location);
+    const updated = await saveSearchHistory(location);
+    setHistory(updated);
+  };
+
+  // ── Forecast ──────────────────────────────────────────────────────────────
+  const { data: forecastData, loading: forecastLoading, error: forecastError, execute: forecastExecute } =
+    useWeather(getForecastByCoords);
+
+  const loadForecast = useCallback(async (): Promise<void> => {
+    if (!selectedLocation) return;
+    await forecastExecute(selectedLocation.lat, selectedLocation.lon, unit);
+  }, [forecastExecute, selectedLocation, unit]);
+
+  useEffect(() => {
+    void loadForecast();
+  }, [loadForecast]);
+
+  const dailySnapshots = useMemo(() => {
+    if (!forecastData?.list) return [];
+    return forecastData.list.filter((e: any) => e.dt_txt.includes('12:00:00')).slice(0, 7);
+  }, [forecastData]);
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  const locationDisplayName = selectedLocation
+    ? (selectedLocation.name === 'Your location' && weatherData?.name
+      ? `${weatherData.name} (Your location)`
+      : selectedLocation.name)
+    : 'Select Location';
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <WeatherCard
-        cityName={data.name}
-        temp={data.main.temp}
-        description={data.weather[0]?.description ?? 'N/A'}
-        feelsLike={data.main.feels_like}
-        humidity={data.main.humidity}
-        windSpeed={data.wind.speed}
-        unit={unit}
+    <SafeAreaView style={styles.outerContainer}>
+      <WeatherHeader
+        cityName={locationDisplayName}
+        onSearch={(q) => void onSearch(q)}
+        onSelectCity={(city) => void onSelectLocation(city)}
+        onLocationPress={() => void loadWeather()}
       />
-      <View style={styles.section}>
-        <Text style={styles.heading}>Quick insight</Text>
-        <Text style={styles.copy}>
-          {data.main.temp > 30
-            ? 'It is hot today. Keep hydrated and avoid direct sunlight at noon.'
-            : 'Comfortable weather today. Good day for outdoor plans.'}
-        </Text>
-      </View>
-      <Pressable style={styles.reloadButton} onPress={() => void loadWeather()}>
-        <Text style={styles.reloadText}>Refresh</Text>
-      </Pressable>
-    </ScrollView>
+
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        {weatherLoading && <LoadingState message="Fetching weather..." />}
+        {weatherError && !weatherLoading && (
+          <ErrorState error={weatherError} onRetry={() => void loadWeather()} />
+        )}
+
+        {weatherData && !weatherLoading && (
+          <>
+            <MainWeatherCard
+              temp={weatherData.main.temp}
+              description={weatherData.weather[0]?.description ?? 'N/A'}
+              unit={unit}
+            />
+
+            <WeatherDetailsGrid
+              humidity={weatherData.main.humidity}
+              windSpeed={weatherData.wind.speed}
+              pressure={weatherData.main.pressure}
+              visibility={weatherData.visibility}
+              unit={unit}
+            />
+          </>
+        )}
+
+        {forecastLoading && <LoadingState message="Loading forecast..." />}
+        {forecastError && !forecastLoading && (
+          <ErrorState error={forecastError} onRetry={() => void loadForecast()} />
+        )}
+
+        {dailySnapshots.length > 0 && (
+          <ForecastSection data={dailySnapshots} unit={unit} />
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   container: {
     backgroundColor: theme.colors.background,
     flexGrow: 1,
-    padding: theme.spacing.md
-  },
-  section: {
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md
-  },
-  heading: {
-    color: theme.colors.text,
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: theme.spacing.xs
-  },
-  copy: {
-    color: theme.colors.muted,
-    lineHeight: 20
-  },
-  reloadButton: {
-    alignItems: 'center',
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.radius.md,
-    marginTop: theme.spacing.lg,
-    padding: theme.spacing.md
-  },
-  reloadText: {
-    color: '#020617',
-    fontWeight: '700'
   }
 });

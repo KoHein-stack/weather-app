@@ -12,28 +12,28 @@ type WeatherCardProps = {
   unit: Unit;
 };
 
-export default function WeatherCard({ cityName, temp, description, feelsLike, humidity, windSpeed, unit }: WeatherCardProps): JSX.Element {
+export default function WeatherCard({ cityName, temp, description, feelsLike, humidity, windSpeed, unit }: WeatherCardProps) {
   const unitSymbol = unit === 'metric' ? '°C' : '°F';
   const speedUnit = unit === 'metric' ? 'm/s' : 'mph';
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.city}>{cityName}</Text>
-      <Text style={styles.temp}>{Math.round(temp)}{unitSymbol}</Text>
-      <Text style={styles.description}>{description}</Text>
+    <View style={styles.card} >
+      <Text style={styles.city}> {cityName} </Text>
+      < Text style={styles.temp} > {Math.round(temp)}{unitSymbol} </Text>
+      < Text style={styles.description} > {description} </Text>
 
-      <View style={styles.row}>
-        <Text style={styles.meta}>Feels like: {Math.round(feelsLike)}{unitSymbol}</Text>
-        <Text style={styles.meta}>Humidity: {humidity}%</Text>
+      < View style={styles.row} >
+        <Text style={styles.meta}> Feels like: {Math.round(feelsLike)} {unitSymbol} </Text>
+        < Text style={styles.meta} > Humidity: {humidity}% </Text>
       </View>
-      <Text style={styles.meta}>Wind: {windSpeed} {speedUnit}</Text>
+      < Text style={styles.meta} > Wind: {windSpeed} {speedUnit} </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
     marginBottom: theme.spacing.md,
     padding: theme.spacing.lg

@@ -5,7 +5,7 @@ type LoadingStateProps = {
   message?: string;
 };
 
-export default function LoadingState({ message = 'Loading weather data...' }: LoadingStateProps): JSX.Element {
+export default function LoadingState({ message = 'Loading weather data...' }: LoadingStateProps) {
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color={theme.colors.primary} />

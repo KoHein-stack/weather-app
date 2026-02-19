@@ -7,24 +7,26 @@ type SearchHistoryListProps = {
   onSelect: (item: SelectedLocation) => void;
 };
 
-export default function SearchHistoryList({ history, onSelect }: SearchHistoryListProps): JSX.Element | null {
+export default function SearchHistoryList({ history, onSelect }: SearchHistoryListProps) {
   if (!history.length) {
     return null;
   }
 
   return (
-    <View style={styles.wrapper}>
-      <Text style={styles.title}>Recent Searches</Text>
-      {history.map((item) => (
-        <Pressable
-          key={`${item.name}-${item.lat}-${item.lon}`}
-          onPress={() => onSelect(item)}
-          style={styles.item}
-        >
-          <Text style={styles.itemText}>{item.name}, {item.country}</Text>
-        </Pressable>
+    <View style= { styles.wrapper } >
+    <Text style={ styles.title }> Recent Searches </Text>
+  {
+    history.map((item) => (
+      <Pressable
+          key= {`${item.name}-${item.lat}-${item.lon}`}
+  onPress = {() => onSelect(item)
+}
+style = { styles.item }
+  >
+  <Text style={ styles.itemText }> { item.name }, { item.country } </Text>
+    </Pressable>
       ))}
-    </View>
+</View>
   );
 }
 
@@ -39,7 +41,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm
   },
   item: {
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.md,
     marginBottom: theme.spacing.xs,
     padding: theme.spacing.sm

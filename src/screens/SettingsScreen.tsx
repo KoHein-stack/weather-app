@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { theme } from '../constants/theme';
 import { useSettings } from '../context/SettingsContext';
 
-export default function SettingsScreen(): JSX.Element {
+export default function SettingsScreen() {
   const { unit, setUnit } = useSettings();
 
   return (
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm
   },
   pill: {
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.md,
     flex: 1,
     padding: theme.spacing.sm

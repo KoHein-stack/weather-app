@@ -13,11 +13,13 @@ export type CurrentWeatherResponse = {
     temp: number;
     feels_like: number;
     humidity: number;
+    pressure: number;
   };
   weather: Array<{ description: string }>;
   wind: {
     speed: number;
   };
+  visibility?: number;
 };
 
 export type ForecastItem = {

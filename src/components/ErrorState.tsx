@@ -6,7 +6,7 @@ type ErrorStateProps = {
   onRetry?: () => void;
 };
 
-export default function ErrorState({ error, onRetry }: ErrorStateProps): JSX.Element {
+export default function ErrorState({ error, onRetry }: ErrorStateProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Something went wrong</Text>

@@ -1,9 +1,12 @@
 export const theme = {
   colors: {
     background: '#0F172A',
-    card: '#1E293B',
+    surface: '#1E293B',
+    surfaceSecondary: '#334155',
+    border: '#1E293B',
+    accent: '#7DD3FC',
     primary: '#38BDF8',
-    text: '#E2E8F0',
+    text: '#F8FAFC',
     muted: '#94A3B8',
     error: '#FB7185',
     success: '#34D399'

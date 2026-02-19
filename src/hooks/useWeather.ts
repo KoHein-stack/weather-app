@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 
-export default function useWeather<TArgs extends unknown[], TResult>(fetcher: (...args: TArgs) => Promise<TResult>) {
+export default function useWeather<TArgs extends unknown[],
+TResult>(fetcher: (...args: TArgs) => Promise<TResult>) {
   const [data, setData] = useState<TResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

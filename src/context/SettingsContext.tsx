@@ -12,15 +12,17 @@ type SettingsContextValue = {
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);
 const SETTINGS_KEY = 'weather_app_settings';
 
-export function SettingsProvider({ children }: { children: ReactNode }): JSX.Element {
+export function SettingsProvider({ children }: { children: ReactNode }) {
   const [unit, setUnit] = useState<Unit>('metric');
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
 
   useEffect(() => {
     (async () => {
       const rawSettings = await AsyncStorage.getItem(SETTINGS_KEY);
+      console.log('rawSettings', rawSettings);
       if (rawSettings) {
         const parsed = JSON.parse(rawSettings) as { unit?: Unit };
+        console.log('parsed', parsed);
         setUnit(parsed.unit ?? 'metric');
       }
     })();
