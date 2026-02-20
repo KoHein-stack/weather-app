@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { theme } from '../../constants/theme';
@@ -12,122 +13,179 @@ type ForecastSectionProps = {
 
 export default function ForecastSection({ data, unit }: ForecastSectionProps) {
   const unitSymbol = unit === 'metric' ? '\u00B0C' : '\u00B0F';
-  const ITEM_WIDTH = 100;
+  const pointWidth = 72;
+  const timelineItems = data;
+  if (!timelineItems.length) return null;
 
-  const highLineData = data.map((item) => ({
-    value: Math.round(item.main.temp_max),
-    dataPointText: `${Math.round(item.main.temp_max)}${unitSymbol}`,
+  const lineData = timelineItems.map((item) => ({
+    value: Math.round(item.main.temp),
+    dataPointText: `${Math.round(item.main.temp)}${unitSymbol}`,
     label: '',
   }));
 
-  const lowLineData = data.map((item) => ({
-    value: Math.round(item.main.temp_min),
-    dataPointText: `${Math.round(item.main.temp_min)}${unitSymbol}`,
-    label: '',
-  }));
+  const lineValues = lineData.map((entry) => entry.value);
+  const maxVal = Math.max(...lineValues);
+  const paddedMax = maxVal + 3;
+  const timelineWidth = Math.max(timelineItems.length * pointWidth, 320);
 
-  const allVals = highLineData.concat(lowLineData).map(d => d.value);
-  const maxVal = Math.max(...allVals);
+  const daySummary = useMemo(() => {
+    const grouped = new Map<string, number[]>();
+    for (const item of timelineItems) {
+      const key = new Date(item.dt * 1000).toDateString();
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key)?.push(item.main.temp);
+    }
+    return Array.from(grouped.entries()).slice(0, 3).map(([key, temps], index) => {
+      const label = index === 0 ? 'Today' : index === 1 ? 'Tomorrow' : 'Day After';
+      return {
+        key,
+        label,
+        min: Math.round(Math.min(...temps)),
+        max: Math.round(Math.max(...temps)),
+      };
+    });
+  }, [timelineItems]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Weekly Forecast</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}
-      >
-        <View>
-          <View style={styles.chartWrapper}>
-            <LineChart
-              data={highLineData}
-              data2={lowLineData}
-              height={160}
-              width={data.length * ITEM_WIDTH}
-              initialSpacing={ITEM_WIDTH / 2}
-              spacing={ITEM_WIDTH}
-              hideDataPoints={false}
-              dataPointsColor1={theme.colors.primary}
-              dataPointsColor2={theme.colors.muted}
-              dataPointsRadius={4}
-              color1={theme.colors.primary}
-              color2={theme.colors.muted}
-              thickness1={3}
-              thickness2={2}
-              curved
-              curveType={1}
-              hideRules
-              hideAxesAndRules
-              hideYAxisText
-              yAxisLabelWidth={0}
-              yAxisThickness={0}
-              xAxisThickness={0}
-              maxValue={maxVal + 5}
-              textColor1={theme.colors.text}
-              textColor2={theme.colors.muted}
-              textFontSize={14}
-            />
-          </View>
-          <View style={styles.infoRow}>
-            {data.map((item) => (
-              <View key={item.dt} style={styles.infoCard}>
-                <Ionicons 
-                  name={getWeatherIcon(item.weather[0]?.main || '')}
-                  size={28}
-                  color={theme.colors.primary}
-                />
-                <Text style={styles.descText}>{item.weather[0]?.main}</Text>
-                <Text style={styles.dateText}>
-                  {new Date(item.dt * 1000).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}
-                </Text>
-              </View>
-            ))}
-          </View>
+    <View style={styles.wrapper}>
+      <Text style={styles.title}>Next 72 Hours</Text>
+      <View style={styles.container}>
+        <View style={styles.summaryRow}>
+          {daySummary.map((day) => (
+            <View key={day.key} style={styles.summaryCard}>
+              <Text style={styles.summaryTitle}>{day.label}</Text>
+              <Text style={styles.summaryRange}>
+                {day.min}{unitSymbol} / {day.max}{unitSymbol}
+              </Text>
+            </View>
+          ))}
         </View>
-      </ScrollView>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.timelineScrollContent}
+        >
+          <View style={[styles.timelineContent, { width: timelineWidth }]}>
+            <View style={styles.chartContainer}>
+              <LineChart
+                data={lineData}
+                height={170}
+                width={timelineWidth}
+                initialSpacing={pointWidth / 2}
+                spacing={pointWidth}
+                hideDataPoints={false}
+                dataPointsColor1={theme.colors.text}
+                dataPointsRadius={4}
+                color1={theme.colors.text}
+                thickness1={2.5}
+                curved
+                hideRules
+                hideAxesAndRules
+                hideYAxisText
+                yAxisLabelWidth={0}
+                yAxisThickness={0}
+                xAxisThickness={0}
+                maxValue={paddedMax}
+                textColor1={theme.colors.text}
+                textFontSize={13}
+              />
+            </View>
+            <View style={styles.bottomInfoRow}>
+              {timelineItems.map((item) => (
+                <View key={item.dt} style={styles.hourItem}>
+                  <Ionicons
+                    name={getWeatherIcon(item.weather[0]?.main || '')}
+                    size={22}
+                    color={theme.colors.primary}
+                  />
+                  <Text style={styles.hourDesc} numberOfLines={1}>
+                    {item.weather[0]?.main || 'N/A'}
+                  </Text>
+                  <Text style={styles.hourText}>
+                    {new Date(item.dt * 1000).toLocaleTimeString([], {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     marginTop: theme.spacing.lg,
-    paddingBottom: 40,
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: 36,
   },
   title: {
     color: theme.colors.text,
     fontSize: 18,
     fontWeight: '700',
     marginBottom: theme.spacing.md,
-    paddingHorizontal: theme.spacing.md,
   },
-  scrollContainer: {
-    paddingHorizontal: theme.spacing.md,
+  container: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.md,
+    overflow: 'hidden',
   },
-  chartWrapper: {
-    marginLeft: 0,
-    paddingLeft: 0,
-  },
-  infoRow: {
+  summaryRow: {
     flexDirection: 'row',
-    marginTop: 10,
+    paddingHorizontal: theme.spacing.sm,
+    gap: theme.spacing.sm,
   },
-  infoCard: {
-    width: 100,
-    alignItems: 'center',
+  summaryCard: {
+    flex: 1,
+    backgroundColor: theme.colors.surfaceSecondary,
+    borderRadius: theme.radius.md,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
-  descText: {
-    color: theme.colors.muted,
-    fontSize: 12,
-    marginTop: 6,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  dateText: {
+  summaryTitle: {
     color: theme.colors.text,
     fontSize: 14,
     fontWeight: '600',
+  },
+  summaryRange: {
+    color: theme.colors.primary,
+    fontSize: 14,
+    fontWeight: '700',
     marginTop: 4,
-    opacity: 0.8,
+  },
+  timelineScrollContent: {
+    paddingHorizontal: theme.spacing.sm,
+  },
+  chartContainer: {
+    marginTop: theme.spacing.sm,
+  },
+  timelineContent: {
+    marginTop: theme.spacing.md,
+  },
+  bottomInfoRow: {
+    marginTop: theme.spacing.md,
+    flexDirection: 'row',
+  },
+  hourItem: {
+    width: 72,
+    alignItems: 'center',
+  },
+  hourDesc: {
+    marginTop: 6,
+    color: theme.colors.text,
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  hourText: {
+    marginTop: 4,
+    color: theme.colors.muted,
+    fontSize: 12,
   },
 });

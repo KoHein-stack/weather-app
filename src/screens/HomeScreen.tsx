@@ -4,6 +4,7 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
+  Text,
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,6 +14,7 @@ import ForecastSection from '../components/home/ForecastSection';
 import MainWeatherCard from '../components/home/MainWeatherCard';
 import WeatherDetailsGrid from '../components/home/WeatherDetailsGrid';
 import WeatherHeader from '../components/home/WeatherHeader';
+import WeeklyForecastSection from '../components/home/WeeklyForecastSection';
 import { theme } from '../constants/theme';
 import { useSettings } from '../context/SettingsContext';
 import useWeather from '../hooks/useWeather';
@@ -149,13 +151,15 @@ export default function HomeScreen() {
     }
   }, [loadWeather, loadForecast]);
 
-  // Process raw forecast list to show midday snapshots for each of the next 7 days
+  // Next 72 hours in 3-hour steps from OpenWeather 5-day forecast
+  const next72HoursData = useMemo(() => {
+    if (!forecastData?.list) return [];
+    return forecastData.list.slice(0, 24);
+  }, [forecastData]);
+
   const dailySnapshots = useMemo(() => {
     if (!forecastData?.list) return [];
-    console.log("Forecast Data List", forecastData.list)
-    let dayLimitForecast = forecastData.list.filter((e: any) => e.dt_txt.includes('12:00:00')).slice(0, 7);
-    console.log("Day Limit Forecast", dayLimitForecast)
-    return dayLimitForecast
+    return forecastData.list.filter((entry) => entry.dt_txt.includes('12:00:00')).slice(0, 7);
   }, [forecastData]);
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -165,6 +169,20 @@ export default function HomeScreen() {
       ? `${weatherData.name} (Your location)`
       : selectedLocation.name)
     : 'Select Location';
+
+  const weatherUpdatedLabel = useMemo(() => {
+
+    if (!weatherData?.dt) return '';
+    const updatedAt = new Date(weatherData.dt * 1000);
+    // alert(`${updatedAt.toLocaleDateString()}  ${updatedAt.toLocaleTimeString([] ,{
+    //   hour: '2-digit',
+    //   minute: '2-digit'
+    // })}`)
+    return `Updated ${updatedAt.toLocaleDateString()} ${updatedAt.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    })}`;
+  }, [weatherData]);
 
   return (
     <SafeAreaView style={styles.outerContainer}>
@@ -195,6 +213,7 @@ export default function HomeScreen() {
 
         {weatherData && !weatherLoading && (
           <>
+            <Text style={styles.updatedText}>{weatherUpdatedLabel}</Text>
             <MainWeatherCard
               temp={weatherData.main.temp}
               description={weatherData.weather[0]?.description ?? 'N/A'}
@@ -216,8 +235,12 @@ export default function HomeScreen() {
           <ErrorState error={forecastError} onRetry={() => void loadForecast()} />
         )}
 
+        {next72HoursData.length > 0 && (
+          <ForecastSection data={next72HoursData} unit={unit} />
+        )}
+
         {dailySnapshots.length > 0 && (
-          <ForecastSection data={dailySnapshots} unit={unit} />
+          <WeeklyForecastSection data={dailySnapshots} unit={unit} />
         )}
       </ScrollView>
     </SafeAreaView>
@@ -232,5 +255,11 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colors.background,
     flexGrow: 1,
-  }
+  },
+  updatedText: {
+    color: theme.colors.muted,
+    fontSize: 13,
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: theme.spacing.sm,
+  },
 });

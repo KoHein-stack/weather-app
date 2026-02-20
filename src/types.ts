@@ -8,6 +8,7 @@ export type SelectedLocation = {
 };
 
 export type CurrentWeatherResponse = {
+  dt: number;
   name: string;
   main: {
     temp: number;
