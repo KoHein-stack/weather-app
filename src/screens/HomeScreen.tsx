@@ -65,7 +65,7 @@ export default function HomeScreen() {
         lon: position.coords.longitude,
         name: 'Your location'
       };
-
+      // current location 
       setSelectedLocation(locationPayload);
       await weatherExecute(locationPayload.lat, locationPayload.lon, unit);
     } catch (err) {
@@ -152,7 +152,10 @@ export default function HomeScreen() {
   // Process raw forecast list to show midday snapshots for each of the next 7 days
   const dailySnapshots = useMemo(() => {
     if (!forecastData?.list) return [];
-    return forecastData.list.filter((e: any) => e.dt_txt.includes('12:00:00')).slice(0, 7);
+    console.log("Forecast Data List", forecastData.list)
+    let dayLimitForecast = forecastData.list.filter((e: any) => e.dt_txt.includes('12:00:00')).slice(0, 7);
+    console.log("Day Limit Forecast", dayLimitForecast)
+    return dayLimitForecast
   }, [forecastData]);
 
   // ── Render ────────────────────────────────────────────────────────────────
