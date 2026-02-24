@@ -14,3 +14,7 @@ export async function saveSearchHistory(city: SelectedLocation): Promise<Selecte
   await AsyncStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(deduped));
   return deduped;
 }
+
+export async function clearSearchHistory(): Promise<void> {
+  await AsyncStorage.removeItem(SEARCH_HISTORY_KEY);
+}

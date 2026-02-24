@@ -12,7 +12,7 @@ type WeeklyForecastSectionProps = {
 
 export default function WeeklyForecastSection({ data, unit }: WeeklyForecastSectionProps) {
   const unitSymbol = unit === 'metric' ? '\u00B0C' : '\u00B0F';
-  const itemWidth = 100;
+  const itemWidth = 88;
 
   const highLineData = data.map((item) => ({
     value: Math.round(item.main.temp_max),
@@ -29,17 +29,24 @@ export default function WeeklyForecastSection({ data, unit }: WeeklyForecastSect
   const allVals = highLineData.concat(lowLineData).map((entry) => entry.value);
   const maxVal = Math.max(...allVals);
 
+  const timelineWidth = Math.max(data.length * itemWidth, 320);
+
   return (
-    <View style={styles.container}>
+    <View style={styles.wrapper}>
       <Text style={styles.title}>Weekly Forecast</Text>
-      <View style={styles.card}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
-          <View>
+      <View style={styles.container}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.timelineScrollContent}
+        >
+          <View style={[styles.timelineContent, { width: timelineWidth }]}>
+            <View style={styles.chartContainer}>
             <LineChart
               data={highLineData}
               data2={lowLineData}
               height={160}
-              width={data.length * itemWidth}
+              width={timelineWidth}
               initialSpacing={itemWidth / 2}
               spacing={itemWidth}
               hideDataPoints={false}
@@ -63,17 +70,21 @@ export default function WeeklyForecastSection({ data, unit }: WeeklyForecastSect
               textColor2={theme.colors.muted}
               textFontSize={14}
             />
+            </View>
             <View style={styles.infoRow}>
               {data.map((item) => (
                 <View key={item.dt} style={styles.infoCard}>
                   <Ionicons
                     name={getWeatherIcon(item.weather[0]?.main || '')}
-                    size={28}
+                    size={22}
                     color={theme.colors.primary}
                   />
                   <Text style={styles.descText}>{item.weather[0]?.main}</Text>
                   <Text style={styles.dateText}>
-                    {new Date(item.dt * 1000).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}
+                    {new Date(item.dt * 1000).toLocaleDateString(undefined, {
+                      month: 'numeric',
+                      day: 'numeric',
+                    })}
                   </Text>
                 </View>
               ))}
@@ -86,8 +97,9 @@ export default function WeeklyForecastSection({ data, unit }: WeeklyForecastSect
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     marginTop: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.md,
     paddingBottom: 40,
   },
   title: {
@@ -95,36 +107,40 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: theme.spacing.md,
-    paddingHorizontal: theme.spacing.md,
   },
-  card: {
+  container: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.lg,
-    paddingVertical: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.md,
+    overflow: 'hidden',
   },
-  scrollContainer: {
+  timelineScrollContent: {
     paddingHorizontal: theme.spacing.sm,
+  },
+  timelineContent: {
+    marginTop: theme.spacing.md,
+  },
+  chartContainer: {
+    marginTop: theme.spacing.sm,
   },
   infoRow: {
     flexDirection: 'row',
-    marginTop: 10,
+    marginTop: theme.spacing.md,
   },
   infoCard: {
-    width: 100,
+    width: 88,
     alignItems: 'center',
   },
   descText: {
-    color: theme.colors.muted,
+    color: theme.colors.text,
     fontSize: 12,
     marginTop: 6,
     textAlign: 'center',
-    fontWeight: '500',
   },
   dateText: {
-    color: theme.colors.text,
-    fontSize: 14,
-    fontWeight: '600',
+    color: theme.colors.muted,
+    fontSize: 12,
     marginTop: 4,
-    opacity: 0.8,
   },
 });

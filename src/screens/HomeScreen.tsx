@@ -19,7 +19,7 @@ import { theme } from '../constants/theme';
 import { useSettings } from '../context/SettingsContext';
 import useWeather from '../hooks/useWeather';
 import { getForecastByCoords, getCurrentWeatherByCoords, searchCity } from '../services/weatherApi';
-import { getSearchHistory, saveSearchHistory } from '../store/searchHistory';
+import { clearSearchHistory, getSearchHistory, saveSearchHistory } from '../store/searchHistory';
 import type { GeoCity, SelectedLocation } from '../types';
 
 export default function HomeScreen() {
@@ -116,6 +116,11 @@ export default function HomeScreen() {
     setHistory(updated);
   };
 
+  const onClearHistory = async (): Promise<void> => {
+    await clearSearchHistory();
+    setHistory([]);
+  };
+
   // ── Forecast Data Hook ────────────────────────────────────────────────────
   // Fetches 5-day / 3-hour forecast data from OpenWeatherMap
   const {
@@ -168,7 +173,7 @@ export default function HomeScreen() {
     ? (selectedLocation.name === 'Your location' && weatherData?.name
       ? `${weatherData.name} (Your location)`
       : selectedLocation.name)
-    : 'Select Location';
+    : 'Search Location';
 
   const weatherUpdatedLabel = useMemo(() => {
 
@@ -192,6 +197,7 @@ export default function HomeScreen() {
         onSearch={(q) => void onSearch(q)}
         onSelectCity={(city) => void onSelectLocation(city)}
         onLocationPress={() => void loadWeather()}
+        onClearHistory={() => void onClearHistory()}
       />
 
       <ScrollView

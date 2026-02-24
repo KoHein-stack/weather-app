@@ -11,6 +11,7 @@ type WeatherHeaderProps = {
   onSearch: (query: string) => void;
   onSelectCity: (city: GeoCity | SelectedLocation) => void;
   onLocationPress: () => void;
+  onClearHistory: () => void;
 };
 
 export default function WeatherHeader({
@@ -18,7 +19,8 @@ export default function WeatherHeader({
   history = [],
   onSearch,
   onSelectCity,
-  onLocationPress
+  onLocationPress,
+  onClearHistory
 }: WeatherHeaderProps) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<GeoCity[]>([]);
@@ -103,7 +105,14 @@ export default function WeatherHeader({
 
         {(showSuggestions || showHistory) && (
           <View style={styles.suggestionsContainer}>
-            {showHistory && <Text style={styles.sectionHeader}>Recent Searches</Text>}
+            {showHistory && (
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionHeader}>Recent Searches</Text>
+                <Pressable onPress={onClearHistory} hitSlop={8}>
+                  <Text style={styles.clearText}>Clear</Text>
+                </Pressable>
+              </View>
+            )}
             {(showSuggestions ? suggestions : history).map((item) => (
               <Pressable
                 key={`${item.lat}-${item.lon}-${'name' in item ? item.name : ''}`}
@@ -195,11 +204,23 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 12,
     fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: theme.spacing.md,
     paddingTop: theme.spacing.md,
     paddingBottom: theme.spacing.xs,
+  },
+  clearText: {
+    color: theme.colors.muted,
+    fontSize: 12,
+    fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.6,
   },
   suggestionItem: {
     flexDirection: 'row',
