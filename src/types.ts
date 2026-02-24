@@ -1,4 +1,5 @@
 export type Unit = 'metric' | 'imperial';
+export type Language = 'en' | 'mm';
 
 export type SelectedLocation = {
   lat: number;

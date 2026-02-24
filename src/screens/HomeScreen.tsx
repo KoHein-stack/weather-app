@@ -18,6 +18,7 @@ import WeeklyForecastSection from '../components/home/WeeklyForecastSection';
 import { theme } from '../constants/theme';
 import { useSettings } from '../context/SettingsContext';
 import useWeather from '../hooks/useWeather';
+import { t } from '../i18n/strings';
 import { getForecastByCoords, getCurrentWeatherByCoords, searchCity } from '../services/weatherApi';
 import { clearSearchHistory, getSearchHistory, saveSearchHistory } from '../store/searchHistory';
 import type { GeoCity, SelectedLocation } from '../types';
@@ -26,7 +27,7 @@ export default function HomeScreen() {
   // ── Global Context ────────────────────────────────────────────────────────
   // unit: 'metric' (C) or 'imperial' (F)
   // selectedLocation: object containing lat, lon, and name of the current city
-  const { unit, selectedLocation, setSelectedLocation } = useSettings();
+  const { unit, language, selectedLocation, setSelectedLocation } = useSettings();
 
   // ── Local State ───────────────────────────────────────────────────────────
   // history: Array of previously searched cities retrieved from AsyncStorage
@@ -65,7 +66,7 @@ export default function HomeScreen() {
       const locationPayload = {
         lat: position.coords.latitude,
         lon: position.coords.longitude,
-        name: 'Your location'
+        name: t(language, 'home.yourLocation')
       };
       // current location 
       setSelectedLocation(locationPayload);
@@ -169,11 +170,14 @@ export default function HomeScreen() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   // Display 'Your location' if the city name matches the device's current location
+  const isCurrentLocationLabel = selectedLocation?.name === 'Your location'
+    || selectedLocation?.name === t(language, 'home.yourLocation');
+
   const locationDisplayName = selectedLocation
-    ? (selectedLocation.name === 'Your location' && weatherData?.name
-      ? `${weatherData.name} (Your location)`
+    ? (isCurrentLocationLabel && weatherData?.name
+      ? `${weatherData.name} (${t(language, 'home.yourLocation')})`
       : selectedLocation.name)
-    : 'Search Location';
+    : t(language, 'home.searchLocation');
 
   const weatherUpdatedLabel = useMemo(() => {
 
@@ -183,11 +187,11 @@ export default function HomeScreen() {
     //   hour: '2-digit',
     //   minute: '2-digit'
     // })}`)
-    return `Updated ${updatedAt.toLocaleDateString()} ${updatedAt.toLocaleTimeString([], {
+    return `${t(language, 'home.updated')} ${updatedAt.toLocaleDateString()} ${updatedAt.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit'
     })}`;
-  }, [weatherData]);
+  }, [language, weatherData]);
 
   return (
     <SafeAreaView style={styles.outerContainer}>
@@ -212,7 +216,7 @@ export default function HomeScreen() {
           />
         }
       >
-        {weatherLoading && !refreshing && <LoadingState message="Fetching weather..." />}
+        {weatherLoading && !refreshing && <LoadingState message={t(language, 'home.fetchingWeather')} />}
         {weatherError && !weatherLoading && (
           <ErrorState error={weatherError} onRetry={() => void loadWeather()} />
         )}
@@ -236,7 +240,7 @@ export default function HomeScreen() {
           </>
         )}
 
-        {forecastLoading && !refreshing && <LoadingState message="Loading forecast..." />}
+        {forecastLoading && !refreshing && <LoadingState message={t(language, 'home.loadingForecast')} />}
         {forecastError && !forecastLoading && (
           <ErrorState error={forecastError} onRetry={() => void loadForecast()} />
         )}
@@ -269,3 +273,4 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.sm,
   },
 });
+

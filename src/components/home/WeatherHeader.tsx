@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { Keyboard, Pressable, StyleSheet, Text, TextInput, View, BackHandler } from 'react-native';
 import { theme } from '../../constants/theme';
+import { useSettings } from '../../context/SettingsContext';
+import { t } from '../../i18n/strings';
 import { searchCity } from '../../services/weatherApi';
 import type { GeoCity, SelectedLocation } from '../../types';
 
@@ -22,6 +24,7 @@ export default function WeatherHeader({
   onLocationPress,
   onClearHistory
 }: WeatherHeaderProps) {
+  const { language } = useSettings();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<GeoCity[]>([]);
   const [isFocused, setIsFocused] = useState(false);
@@ -84,7 +87,7 @@ export default function WeatherHeader({
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color={theme.colors.muted} style={styles.searchIcon} />
           <TextInput
-            placeholder="Search your city..."
+            placeholder={t(language, 'home.searchPlaceholder')}
             placeholderTextColor={theme.colors.muted}
             style={styles.input}
             value={query}
@@ -107,9 +110,9 @@ export default function WeatherHeader({
           <View style={styles.suggestionsContainer}>
             {showHistory && (
               <View style={styles.sectionHeaderRow}>
-                <Text style={styles.sectionHeader}>Recent Searches</Text>
+                <Text style={styles.sectionHeader}>{t(language, 'home.recentSearches')}</Text>
                 <Pressable onPress={onClearHistory} hitSlop={8}>
-                  <Text style={styles.clearText}>Clear</Text>
+                  <Text style={styles.clearText}>{t(language, 'home.clear')}</Text>
                 </Pressable>
               </View>
             )}
