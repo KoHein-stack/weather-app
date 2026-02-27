@@ -19,6 +19,7 @@ type SettingsStackParamList = {
 const SettingsStack = createStackNavigator<SettingsStackParamList>();
 
 function SettingsStackNavigator() {
+  // Pull language from context here so stack titles react immediately to language switch.
   const { language } = useSettings();
   return (
     <SettingsStack.Navigator
@@ -55,6 +56,7 @@ type TabParamList = {
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
+// Keep navigation theme aligned with app palette so headers/tabs match screen surfaces.
 const navTheme = {
   ...DefaultTheme,
   colors: {
@@ -79,6 +81,7 @@ export default function AppNavigator() {
             tabBarActiveTintColor: theme.colors.primary,
             tabBarInactiveTintColor: theme.colors.muted,
             tabBarIcon: ({ color, size }) => {
+              // Route name is a stable key; icon lookup avoids per-screen conditionals.
               const iconMap: Record<keyof TabParamList, keyof typeof Ionicons.glyphMap> = {
                 Home: 'partly-sunny',
                 Settings: 'settings'

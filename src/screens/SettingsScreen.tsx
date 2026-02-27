@@ -21,6 +21,7 @@ type Props = {
 export default function SettingsScreen({ navigation }: Props) {
   const { unit, setUnit, language, setLanguage } = useSettings();
 
+  // Local constant for manual bump; replace with app config/version service when introduced.
   const appVersion = '1.0.0';
 
   return (
@@ -34,6 +35,7 @@ export default function SettingsScreen({ navigation }: Props) {
           {t(language, 'settings.temperatureUnit')}
         </Text>
         <View style={styles.row}>
+          {/* Unit toggles update global settings context; weather data will re-fetch in HomeScreen. */}
           <Pressable
             style={[styles.pill, unit === 'metric' && styles.pillActive]}
             onPress={() => setUnit('metric')}
@@ -64,6 +66,7 @@ export default function SettingsScreen({ navigation }: Props) {
           {t(language, 'settings.language')}
         </Text>
         <View style={styles.row}>
+          {/* Language switch is immediate because all labels are resolved via t(language, ...). */}
           <Pressable
             style={[styles.pill, language === 'en' && styles.pillActive]}
             onPress={() => setLanguage('en')}

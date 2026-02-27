@@ -7,6 +7,7 @@ const GEO_URL = 'https://api.openweathermap.org/geo/1.0';
 // const GEO_URL = 'http://api.weatherapi.com/v1';
 
 function ensureApiKey(): void {
+  // Fail fast so callers get a clear configuration error before any network call.
   if (!API_KEY) {
     throw new Error('Missing API key. Add EXPO_PUBLIC_WEATHER_API_KEY to your .env file.');
   }
@@ -17,6 +18,7 @@ async function request<T>(url: string): Promise<T> {
   const response = await fetch(url);
 
   if (!response.ok) {
+    // OpenWeather error payload usually contains { message }, but keep a safe fallback.
     const errorPayload = (await response.json().catch(() => ({}))) as { message?: string };
     const message = errorPayload.message || 'Unable to fetch weather data.';
     throw new Error(message);
@@ -34,6 +36,7 @@ export async function getForecastByCoords(lat: number, lon: number, unit: Unit =
 }
 
 export async function searchCity(query: string, limit = 5): Promise<GeoCity[]> {
+  // Avoid unnecessary API calls when search box is empty/whitespace.
   if (!query?.trim()) {
     return [];
   }

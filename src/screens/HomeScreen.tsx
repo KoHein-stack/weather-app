@@ -24,19 +24,14 @@ import { clearSearchHistory, getSearchHistory, saveSearchHistory } from '../stor
 import type { GeoCity, SelectedLocation } from '../types';
 
 export default function HomeScreen() {
-  // ── Global Context ────────────────────────────────────────────────────────
-  // unit: 'metric' (C) or 'imperial' (F)
-  // selectedLocation: object containing lat, lon, and name of the current city
+  // Settings context is the single source of truth for unit/language/current city.
   const { unit, language, selectedLocation, setSelectedLocation } = useSettings();
 
-  // ── Local State ───────────────────────────────────────────────────────────
-  // history: Array of previously searched cities retrieved from AsyncStorage
+  // Keep recent searches local to this screen; persistence is handled by searchHistory store.
   const [history, setHistory] = useState<SelectedLocation[]>([]);
-  // refreshing: Controls the visibility of the pull-to-refresh spinner
   const [refreshing, setRefreshing] = useState(false);
 
-  // ── Current Weather Data ──────────────────────────────────────────────────
-  // useWeather hook abstracts the API calling, loading states, and error handling
+  // useWeather encapsulates loading/error state so UI can stay declarative.
   const {
     data: weatherData,
     loading: weatherLoading,
@@ -68,10 +63,11 @@ export default function HomeScreen() {
         lon: position.coords.longitude,
         name: t(language, 'home.yourLocation')
       };
-      // current location 
+      // Persist selected GPS location into context so forecast + header stay in sync.
       setSelectedLocation(locationPayload);
       await weatherExecute(locationPayload.lat, locationPayload.lon, unit);
     } catch (err) {
+      // Clear stale weather if the fresh request fails to avoid showing outdated data.
       setWeatherData(null);
       throw err;
     }
@@ -82,7 +78,6 @@ export default function HomeScreen() {
     loadWeather().catch(() => undefined);
   }, [loadWeather]);
 
-  // ── Search & History Implementation ───────────────────────────────────────
   const { execute: searchExecute } = useWeather(searchCity);
 
   // Initial load of search history from persistent storage
@@ -98,7 +93,8 @@ export default function HomeScreen() {
     if (!query.trim()) return;
     const result = await searchExecute(query, 1);
     if (result && result.length > 0) {
-      onSelectLocation(result[0]);
+      // Product decision: auto-pick first result for faster search flow.
+      void onSelectLocation(result[0]);
     }
   };
 
@@ -122,8 +118,7 @@ export default function HomeScreen() {
     setHistory([]);
   };
 
-  // ── Forecast Data Hook ────────────────────────────────────────────────────
-  // Fetches 5-day / 3-hour forecast data from OpenWeatherMap
+  // Forecast API returns 3-hour buckets for the next 5 days.
   const {
     data: forecastData,
     loading: forecastLoading,
@@ -157,19 +152,19 @@ export default function HomeScreen() {
     }
   }, [loadWeather, loadForecast]);
 
-  // Next 72 hours in 3-hour steps from OpenWeather 5-day forecast
+  // 24 * 3h entries = next 72 hours.
   const next72HoursData = useMemo(() => {
     if (!forecastData?.list) return [];
     return forecastData.list.slice(0, 24);
   }, [forecastData]);
 
+  // Noon snapshots produce stable daily cards and avoid day-boundary duplicates.
   const dailySnapshots = useMemo(() => {
     if (!forecastData?.list) return [];
     return forecastData.list.filter((entry) => entry.dt_txt.includes('12:00:00')).slice(0, 7);
   }, [forecastData]);
 
-  // ── Render ────────────────────────────────────────────────────────────────
-  // Display 'Your location' if the city name matches the device's current location
+  // Support both raw and translated "Your location" labels to keep logic language-safe.
   const isCurrentLocationLabel = selectedLocation?.name === 'Your location'
     || selectedLocation?.name === t(language, 'home.yourLocation');
 
@@ -218,7 +213,7 @@ export default function HomeScreen() {
       >
         {weatherLoading && !refreshing && <LoadingState message={t(language, 'home.fetchingWeather')} />}
         {weatherError && !weatherLoading && (
-          <ErrorState error={weatherError} onRetry={() => void loadWeather()} />
+          <ErrorState error={weatherError} onRetry={() => void onRefresh()} /> 
         )}
 
         {weatherData && !weatherLoading && (
@@ -242,7 +237,7 @@ export default function HomeScreen() {
 
         {forecastLoading && !refreshing && <LoadingState message={t(language, 'home.loadingForecast')} />}
         {forecastError && !forecastLoading && (
-          <ErrorState error={forecastError} onRetry={() => void loadForecast()} />
+          <ErrorState error={forecastError} onRetry={() => void onRefresh()} />
         )}
 
         {next72HoursData.length > 0 && (
