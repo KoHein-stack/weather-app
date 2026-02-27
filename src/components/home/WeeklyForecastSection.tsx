@@ -2,15 +2,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { theme } from '../../constants/theme';
-import type { ForecastItem, Unit } from '../../types';
+import { t } from '../../i18n/strings';
+import type { ForecastItem, Language, Unit } from '../../types';
 import { getWeatherIcon } from '../../utils/weatherIcons';
 
 type WeeklyForecastSectionProps = {
   data: ForecastItem[];
   unit: Unit;
+  language: Language;
 };
 
-export default function WeeklyForecastSection({ data, unit }: WeeklyForecastSectionProps) {
+export default function WeeklyForecastSection({ data, unit, language }: WeeklyForecastSectionProps) {
   const unitSymbol = unit === 'metric' ? '\u00B0C' : '\u00B0F';
   const itemWidth = 88;
 
@@ -33,7 +35,7 @@ export default function WeeklyForecastSection({ data, unit }: WeeklyForecastSect
 
   return (
     <View style={styles.wrapper}>
-      <Text style={styles.title}>Weekly Forecast</Text>
+      <Text style={styles.title}>{t(language, 'home.weeklyForecast')}</Text>
       <View style={styles.container}>
         <ScrollView
           horizontal

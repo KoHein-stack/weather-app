@@ -5,8 +5,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { theme } from '../constants/theme';
 import HomeScreen from '../screens/HomeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import { t } from '../i18n/strings';
 import UserAgreementScreen from '../screens/UserAgreementScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import { useSettings } from '../context/SettingsContext';
 
 type SettingsStackParamList = {
   SettingsHome: undefined;
@@ -17,6 +19,7 @@ type SettingsStackParamList = {
 const SettingsStack = createStackNavigator<SettingsStackParamList>();
 
 function SettingsStackNavigator() {
+  const { language } = useSettings();
   return (
     <SettingsStack.Navigator
       screenOptions={{
@@ -29,17 +32,17 @@ function SettingsStackNavigator() {
       <SettingsStack.Screen
         name="SettingsHome"
         component={SettingsScreen}
-        options={{ title: 'Settings' }}
+        options={{ title: t(language, 'settings.settings') }}
       />
-      < SettingsStack.Screen
+      <SettingsStack.Screen
         name="UserAgreement"
         component={UserAgreementScreen}
-        options={{ title: 'User Agreement' }}
+        options={{ title: t(language, 'settings.userAgreement') }}
       />
-      < SettingsStack.Screen
+      <SettingsStack.Screen
         name="PrivacyPolicy"
         component={PrivacyPolicyScreen}
-        options={{ title: 'Privacy Policy' }}
+        options={{ title: t(language, 'settings.privacyPolicy') }}
       />
     </SettingsStack.Navigator>
   );
@@ -64,6 +67,7 @@ const navTheme = {
 };
 
 export default function AppNavigator() {
+  const { language } = useSettings();
   return (
     <NavigationContainer theme={navTheme} >
       <Tab.Navigator
@@ -87,13 +91,18 @@ export default function AppNavigator() {
         <Tab.Screen
           name="Home"
           component={HomeScreen}
-          options={{ headerShown: false }
-          }
+          options={{
+            headerShown: false,
+            tabBarLabel: t(language, 'home.home'),
+          }}
         />
-        < Tab.Screen
+        <Tab.Screen
           name="Settings"
           component={SettingsStackNavigator}
-          options={{ headerShown: false }}
+          options={{
+            headerShown: false,
+            tabBarLabel: t(language, 'settings.settings'),
+          }}
         />
       </Tab.Navigator>
     </NavigationContainer>

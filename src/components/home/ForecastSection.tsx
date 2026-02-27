@@ -3,15 +3,17 @@ import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { theme } from '../../constants/theme';
-import type { ForecastItem, Unit } from '../../types';
+import { t } from '../../i18n/strings';
+import type { ForecastItem, Language, Unit } from '../../types';
 import { getWeatherIcon } from '../../utils/weatherIcons';
 
 type ForecastSectionProps = {
   data: ForecastItem[];
   unit: Unit;
+  language: Language;
 };
 
-export default function ForecastSection({ data, unit }: ForecastSectionProps) {
+export default function ForecastSection({ data, unit, language }: ForecastSectionProps) {
   const unitSymbol = unit === 'metric' ? '\u00B0C' : '\u00B0F';
   const pointWidth = 72;
   const timelineItems = data;
@@ -48,7 +50,7 @@ export default function ForecastSection({ data, unit }: ForecastSectionProps) {
 
   return (
     <View style={styles.wrapper}>
-      <Text style={styles.title}>Next 72 Hours</Text>
+      <Text style={styles.title}>{t(language, 'home.next72Hours')}</Text>
       <View style={styles.container}>
         <View style={styles.summaryRow}>
           {daySummary.map((day) => (

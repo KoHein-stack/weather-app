@@ -246,11 +246,11 @@ export default function HomeScreen() {
         )}
 
         {next72HoursData.length > 0 && (
-          <ForecastSection data={next72HoursData} unit={unit} />
+          <ForecastSection data={next72HoursData} unit={unit} language={language} />
         )}
 
         {dailySnapshots.length > 0 && (
-          <WeeklyForecastSection data={dailySnapshots} unit={unit} />
+          <WeeklyForecastSection data={dailySnapshots} unit={unit} language={language} />
         )}
       </ScrollView>
     </SafeAreaView>

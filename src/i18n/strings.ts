@@ -2,6 +2,7 @@ import type { Language } from '../types';
 
 type TranslationKey =
   | 'settings.preferences'
+  | 'settings.settings'
   | 'settings.temperatureUnit'
   | 'settings.language'
   | 'settings.about'
@@ -12,6 +13,7 @@ type TranslationKey =
   | 'settings.myanmar'
   | 'settings.celsius'
   | 'settings.fahrenheit'
+  | 'home.home'
   | 'home.searchPlaceholder'
   | 'home.recentSearches'
   | 'home.clear'
@@ -19,11 +21,14 @@ type TranslationKey =
   | 'home.yourLocation'
   | 'home.updated'
   | 'home.fetchingWeather'
-  | 'home.loadingForecast';
+  | 'home.loadingForecast'
+  | 'home.next72Hours'
+  | 'home.weeklyForecast';
 
 const strings: Record<Language, Record<TranslationKey, string>> = {
   en: {
     'settings.preferences': 'Preferences',
+    'settings.settings': 'Settings',
     'settings.temperatureUnit': 'Temperature Unit',
     'settings.language': 'Language',
     'settings.about': 'About',
@@ -34,6 +39,7 @@ const strings: Record<Language, Record<TranslationKey, string>> = {
     'settings.myanmar': 'Myanmar',
     'settings.celsius': 'Celsius (deg C)',
     'settings.fahrenheit': 'Fahrenheit (deg F)',
+    'home.home': 'Home',
     'home.searchPlaceholder': 'Search your city...',
     'home.recentSearches': 'Recent Searches',
     'home.clear': 'Clear',
@@ -42,9 +48,12 @@ const strings: Record<Language, Record<TranslationKey, string>> = {
     'home.updated': 'Updated',
     'home.fetchingWeather': 'Fetching weather...',
     'home.loadingForecast': 'Loading forecast',
+    'home.next72Hours': 'Next 72 hours',
+    'home.weeklyForecast': 'Weekly forecast',
   },
   mm: {
     'settings.preferences': 'ဆက်တင်များ',
+    'settings.settings': 'ဆက်တင်များ',
     'settings.temperatureUnit': 'အပူချိန်ယူနစ်',
     'settings.language': 'ဘာသာစကား',
     'settings.about': 'အကြောင်းအရာ',
@@ -55,6 +64,7 @@ const strings: Record<Language, Record<TranslationKey, string>> = {
     'settings.myanmar': 'မြန်မာ',
     'settings.celsius': 'စင်တီဂရိတ် (deg C)',
     'settings.fahrenheit': 'ဖာရန်ဟိုက် (deg F)',
+    'home.home': 'ပင်မ',
     'home.searchPlaceholder': 'မြို့ကို ရှာဖွေပါ...',
     'home.recentSearches': 'မကြာသေးမီ ရှာဖွေမှုများ',
     'home.clear': 'ဖျက်မည်',
@@ -63,10 +73,11 @@ const strings: Record<Language, Record<TranslationKey, string>> = {
     'home.updated': 'နောက်ဆုံးပြင်ဆင်ချိန်',
     'home.fetchingWeather': 'ရာသီဥတု ဒေတာကို ရယူနေသည်...',
     'home.loadingForecast': 'ခန့်မှန်းချက်ကို တင်နေသည်',
+    'home.next72Hours': 'နောက် ၇၂ နာရီ',
+    'home.weeklyForecast': 'အပတ်စဉ် ခန့်မှန်းချက်',
   },
 };
 
 export function t(language: Language, key: TranslationKey): string {
   return strings[language][key];
 }
-
