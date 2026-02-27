@@ -34,6 +34,46 @@ Production-ready weather app starter using React Native + Expo, React Navigation
    npm start
    ```
 
+## Expo build commands
+
+### Development run commands
+
+```bash
+# Start Metro
+npm start
+
+# Run on Android (requires Android Studio/emulator)
+npm run android
+
+# Run on iOS (macOS + Xcode only)
+npm run ios
+
+# Run web
+npm run web
+```
+
+### Production builds with EAS
+
+```bash
+# Install EAS CLI (once)
+npm install -g eas-cli
+
+# Login
+eas login
+
+# Configure project (first time)
+eas build:configure
+
+# Android APK (internal testing)
+eas build -p android --profile preview
+
+# Android AAB (store release)
+eas build -p android --profile production
+
+# iOS build (TestFlight/App Store profile)
+eas build -p ios --profile production
+```
+
 ## Required packages
 
 - expo
